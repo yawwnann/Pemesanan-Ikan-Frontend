@@ -2,7 +2,7 @@
 import React, { useState, useEffect, Fragment } from "react"; // Import useEffect & Fragment
 import apiClient from "../api/apiClient";
 import { useNavigate } from "react-router-dom";
-import backgroundImage from "../assets/fish-login-regis.jpg";
+import backgroundImage from "../assets/bg-login.jpg";
 import Icon from "../assets/icon-pasifix.png";
 import { Dialog, Transition } from "@headlessui/react"; // Import komponen Modal
 import { CheckCircleIcon } from "@heroicons/react/24/outline"; // Import ikon centang
@@ -83,7 +83,7 @@ function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-indigo-500 flex items-center justify-center p-8 overflow-hidden">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8 overflow-hidden">
       {/* Kontainer utama dengan animasi */}
       <div
         className={`w-full max-w-4xl flex rounded-xl shadow-xl overflow-hidden transition-all duration-700 ease-out transform ${
@@ -138,7 +138,7 @@ function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Nama lengkap Anda"
               />
             </div>
@@ -156,7 +156,7 @@ function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Alamat email Anda"
               />
             </div>
@@ -174,7 +174,7 @@ function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Kata sandi (min. 8 karakter)"
               />
             </div>
@@ -192,7 +192,7 @@ function RegisterPage() {
                 value={passwordConfirmation}
                 onChange={(e) => setPasswordConfirmation(e.target.value)}
                 required
-                className="w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Konfirmasi kata sandi Anda"
               />
             </div>
@@ -203,7 +203,7 @@ function RegisterPage() {
                 id="agree"
                 checked={agree}
                 onChange={(e) => setAgree(e.target.checked)}
-                className="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label htmlFor="agree" className="text-sm text-gray-600">
                 Saya setuju dengan{" "}
@@ -211,7 +211,7 @@ function RegisterPage() {
                   href="/terms"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-indigo-600 hover:underline"
+                  className="text-blue-600 hover:underline"
                 >
                   Syarat dan Ketentuan
                 </a>{" "}
@@ -220,7 +220,7 @@ function RegisterPage() {
                   href="/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-indigo-600 hover:underline"
+                  className="text-blue-600 hover:underline"
                 >
                   Kebijakan Privasi
                 </a>
@@ -234,7 +234,7 @@ function RegisterPage() {
               className={`w-full py-3 text-white font-semibold rounded-lg transition duration-300 ${
                 loading || !agree
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-2"
+                  : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-2"
               }`}
             >
               {loading ? "Sedang memproses..." : "Buat Akun"}
@@ -244,7 +244,7 @@ function RegisterPage() {
               <span>Sudah punya akun? </span>
               <a
                 href="/login"
-                className="text-indigo-600 hover:underline font-semibold"
+                className="text-blue-600 hover:underline font-semibold"
               >
                 Masuk di sini
               </a>
@@ -309,7 +309,7 @@ function RegisterPage() {
                   <div className="mt-6 flex justify-center">
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                       onClick={closeModalAndNavigate} // Tombol menutup modal dan navigasi ke Login
                     >
                       OK

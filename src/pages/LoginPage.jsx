@@ -1,11 +1,12 @@
 // src/pages/LoginPage.jsx
-import React, { useState, useEffect, Fragment } from "react"; // Import useEffect & Fragment
+import React, { useState, useEffect, Fragment } from "react";
 import apiClient from "../api/apiClient";
 import { useNavigate } from "react-router-dom";
-import backgroundImage from "../assets/fish-login-regis.jpg";
+// Pastikan path background image ini benar
+import backgroundImage from "../assets/bg-login.jpg";
 import Icon from "../assets/icon-pasifix.png";
-import { Dialog, Transition } from "@headlessui/react"; // Import komponen Modal
-import { CheckCircleIcon } from "@heroicons/react/24/outline"; // Import ikon centang
+import { Dialog, Transition } from "@headlessui/react";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,22 +15,29 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [isMounted, setIsMounted] = useState(false);
-  const [agree, setAgree] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false); // State untuk modal sukses
+  const [agree, setAgree] = useState(false); // State agree dari kode Anda
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Fungsi untuk menutup modal dan navigasi
   const closeModalAndNavigate = () => {
     setIsSuccessModalOpen(false);
-    navigate("/dashboard"); // Navigasi setelah modal ditutup
+    navigate("/dashboard");
   };
 
+  // --- handleSubmit dengan logika penyimpanan token ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+
+    // Validasi tambahan jika perlu (misal: agree)
+    // if (!agree) {
+    //     setError("Anda harus menyetujui syarat untuk login."); // Contoh jika 'agree' diperlukan
+    //     return;
+    // }
+
     setLoading(true);
 
     try {
@@ -38,13 +46,29 @@ function LoginPage() {
         password: password,
       });
 
-      console.log("Login successful:", response.data);
-      // Simpan token/data user jika perlu
-      // localStorage.setItem('token', response.data.token);
+      console.log("Login successful response:", response.data); // Log response
 
-      // --- Tampilkan modal sukses ---
-      // alert("Login Berhasil! Anda akan diarahkan ke halaman dashboard."); // Ganti alert()
-      setIsSuccessModalOpen(true); // Buka modal
+      // --- Ambil dan Simpan Token ---
+      const token = response.data.token;
+      const user = response.data.user; // Opsional
+
+      if (token) {
+        // Simpan token ke localStorage
+        localStorage.setItem("authToken", token); // Gunakan key 'authToken'
+        console.log("Token saved to localStorage:", token);
+
+        // (Opsional) Simpan data user
+        if (user) {
+          localStorage.setItem("authUser", JSON.stringify(user));
+        }
+
+        // Lanjutkan: Tampilkan modal sukses
+        setIsSuccessModalOpen(true);
+      } else {
+        // Handle jika token tidak ada di response
+        console.error("Token not found in login response!");
+        setError("Login berhasil, namun data autentikasi tidak diterima.");
+      }
       // Navigasi dipindah ke closeModalAndNavigate
     } catch (err) {
       console.error("Login error:", err.response || err.message);
@@ -56,9 +80,11 @@ function LoginPage() {
       setLoading(false);
     }
   };
+  // --- Akhir handleSubmit ---
 
   return (
-    <div className="min-h-screen bg-indigo-500 flex items-center justify-center p-8 overflow-hidden">
+    // Latar belakang dari kode Anda: bg-gray-50
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8 overflow-hidden">
       {/* Kontainer utama dengan animasi */}
       <div
         className={`w-full max-w-4xl flex rounded-xl shadow-xl overflow-hidden transition-all duration-700 ease-out transform ${
@@ -69,7 +95,7 @@ function LoginPage() {
         <div
           className="w-1/2 p-12 flex-col items-start justify-center text-white hidden sm:flex"
           style={{
-            backgroundImage: `url(${backgroundImage})`,
+            backgroundImage: `url(${backgroundImage})`, // Background image dari kode Anda
             backgroundSize: "cover",
             backgroundPosition: "center",
             minHeight: "50vh",
@@ -85,7 +111,6 @@ function LoginPage() {
 
         {/* Right side (Login form) */}
         <div className="w-full sm:w-1/2 bg-white p-8 sm:p-12 flex flex-col justify-center space-y-6">
-          {/* ... (kode form tidak berubah) ... */}
           <h2 className="text-3xl font-bold text-gray-800 text-center">
             Masuk ke Akun Anda
           </h2>
@@ -113,7 +138,7 @@ function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Alamat email Anda"
               />
             </div>
@@ -131,17 +156,19 @@ function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-6 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Kata sandi Anda"
               />
             </div>
+
+            {/* Checkbox 'agree' dari kode Anda */}
             <div className="flex items-center">
               <input
                 type="checkbox"
                 id="agree"
                 checked={agree}
                 onChange={(e) => setAgree(e.target.checked)}
-                className="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label htmlFor="agree" className="text-sm text-gray-600">
                 Saya setuju dengan{" "}
@@ -149,7 +176,7 @@ function LoginPage() {
                   href="/terms"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-indigo-600 hover:underline"
+                  className="text-blue-600 hover:underline"
                 >
                   Syarat dan Ketentuan
                 </a>{" "}
@@ -158,7 +185,7 @@ function LoginPage() {
                   href="/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-indigo-600 hover:underline"
+                  className="text-blue-600 hover:underline"
                 >
                   Kebijakan Privasi
                 </a>
@@ -166,13 +193,14 @@ function LoginPage() {
               </label>
             </div>
 
+            {/* Tombol dengan disabled berdasarkan agree dari kode Anda */}
             <button
               type="submit"
               disabled={loading || !agree}
               className={`w-full py-3 text-white font-semibold rounded-lg transition duration-300 ${
-                loading
+                loading || !agree
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-2"
+                  : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 focus:ring-offset-2"
               }`}
             >
               {loading ? "Sedang memproses..." : "Masuk"}
@@ -182,7 +210,7 @@ function LoginPage() {
               <span>Belum punya akun? </span>
               <a
                 href="/register"
-                className="text-indigo-600 hover:underline font-semibold"
+                className="text-blue-600 hover:underline font-semibold"
               >
                 Daftar di sini
               </a>
@@ -195,26 +223,26 @@ function LoginPage() {
       <Transition appear show={isSuccessModalOpen} as={Fragment}>
         <Dialog
           as="div"
-          className="relative z-10"
+          className="relative z-50" // Pastikan z-index tinggi
           onClose={closeModalAndNavigate}
         >
-          {/* Latar belakang (overlay) - Hanya Efek Blur */}
+          {/* Overlay dengan backdrop blur */}
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
-            enterFrom="opacity-0" // Transisi untuk opacity blur jika diinginkan
+            enterFrom="opacity-0"
             enterTo="opacity-100"
             leave="ease-in duration-200"
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            {/* Hapus bg-black dan bg-opacity, tambahkan backdrop-blur */}
             <div
-              className="fixed inset-0 backdrop-blur-sm"
+              className="fixed inset-0 backdrop-blur-sm bg-black/20" // Sedikit bg hitam transparan untuk kontras blur
               aria-hidden="true"
             />
           </Transition.Child>
 
+          {/* Konten Modal */}
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
               <Transition.Child
@@ -243,11 +271,10 @@ function LoginPage() {
                       dashboard.
                     </p>
                   </div>
-
                   <div className="mt-6 flex justify-center">
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                       onClick={closeModalAndNavigate}
                     >
                       OK
