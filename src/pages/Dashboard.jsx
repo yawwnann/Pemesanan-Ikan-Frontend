@@ -160,67 +160,14 @@ function Dashboard() {
         </div>
       </section>
 
-      <section className="container mx-auto px-6 py-16 text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8">
-          Kenapa Memilih Kami?
-        </h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl transition duration-300 ease-in-out">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl text-left font-bold text-gray-800">
-                100% PRODUK ASLI
-              </h3>
-              <div className="bg-blue-500 p-3 rounded-full text-white flex-shrink-0">
-                <CheckCircleIcon className="h-8 w-8" />
-              </div>
-            </div>
-
-            <p className="text-gray-600 text-left">
-              Kami hanya menyediakan ikan berkualitas dengan jaminan keaslian
-              dan kesegaran yang terjaga.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl transition duration-300 ease-in-out">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl text-left font-bold text-gray-800">
-                PENGIRIMAN CEPAT
-              </h3>
-              <div className="bg-blue-500 p-3 rounded-full text-white flex-shrink-0">
-                <TruckIcon className="h-8 w-8" />
-              </div>
-            </div>
-            <p className="text-gray-600 text-left">
-              Pengiriman cepat dengan berbagai opsi pengiriman, menjamin ikan
-              sampai tepat waktu dan dalam kondisi baik.
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl transition duration-300 ease-in-out">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-left text-gray-800">
-                HARGA TERJANGKAU
-              </h3>
-              <div className="bg-blue-500 p-3 rounded-full text-white flex-shrink-0">
-                <TagIcon className="h-8 w-8" />
-              </div>
-            </div>
-            <p className="text-gray-600 text-left">
-              Menawarkan harga yang kompetitif dan banyak promo khusus untuk
-              setiap pembelian ikan segar.
-            </p>
-          </div>
-        </div>
-      </section>
-
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900">
+            <h3 className="text-4xl md:text-5xl font-extrabold text-gray-900">
               Katalog Ikan
-            </h2>
+            </h3>
             {ikanList.length > 8 && (
-              <div className="text-center mt-12">
+              <div className="text-center ">
                 <button className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
                   Lihat Semua Ikan
                 </button>
@@ -278,6 +225,59 @@ function Dashboard() {
                     </div>
                   </div>
                 ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="container mx-auto px-6 py-16 text-center">
+        <h2 className="text-3xl font-bold text-gray-800 mb-8">
+          Kenapa Memilih Kami?
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl transition duration-300 ease-in-out">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl text-left font-bold text-gray-800">
+                100% PRODUK ASLI
+              </h3>
+              <div className="bg-blue-500 p-3 rounded-full text-white flex-shrink-0">
+                <CheckCircleIcon className="h-8 w-8" />
+              </div>
+            </div>
+
+            <p className="text-gray-600 text-left">
+              Kami hanya menyediakan ikan berkualitas dengan jaminan keaslian
+              dan kesegaran yang terjaga.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl transition duration-300 ease-in-out">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl text-left font-bold text-gray-800">
+                PENGIRIMAN CEPAT
+              </h3>
+              <div className="bg-blue-500 p-3 rounded-full text-white flex-shrink-0">
+                <TruckIcon className="h-8 w-8" />
+              </div>
+            </div>
+            <p className="text-gray-600 text-left">
+              Pengiriman cepat dengan berbagai opsi pengiriman, menjamin ikan
+              sampai tepat waktu dan dalam kondisi baik.
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-2xl transition duration-300 ease-in-out">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-left text-gray-800">
+                HARGA TERJANGKAU
+              </h3>
+              <div className="bg-blue-500 p-3 rounded-full text-white flex-shrink-0">
+                <TagIcon className="h-8 w-8" />
+              </div>
+            </div>
+            <p className="text-gray-600 text-left">
+              Menawarkan harga yang kompetitif dan banyak promo khusus untuk
+              setiap pembelian ikan segar.
+            </p>
           </div>
         </div>
       </section>
