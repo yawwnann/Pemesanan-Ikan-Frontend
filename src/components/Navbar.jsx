@@ -1,4 +1,4 @@
-import React, { useState, Fragment } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Dialog, Transition } from "@headlessui/react";
 import {
@@ -18,20 +18,32 @@ import siteLogo from "../assets/icon-pasifix.png";
 function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [user, setUser] = useState(null); // State for storing user data
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch user data from the API
+    const fetchUserData = async () => {
+      try {
+        const response = await apiClient.get("/user");
+        setUser(response.data.user); // Set the user data
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      console.log("Attempting to call POST /logout");
       const response = await apiClient.post("/logout");
       console.log("Logout API response:", response.data);
 
-      console.log("Logout API call successful. Removing local data...");
       localStorage.removeItem("authToken");
       localStorage.removeItem("authUser");
 
-      console.log("Local data removed. Redirecting to login.");
       navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error.response || error.message);
@@ -129,6 +141,12 @@ function Navbar() {
           </div>
 
           <div className="hidden md:ml-4 md:flex md:items-center md:space-x-4">
+            {user && (
+              <span className="text-white font-semibold">
+                {user.name} {/* Display user name */}
+              </span>
+            )}
+
             <NavLink
               to="/profile"
               className="p-1 rounded-full text-blue-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-600 focus:ring-white"
@@ -220,10 +238,10 @@ function Navbar() {
               </NavLink>
               <div className="ml-3 flex-1 min-w-0">
                 <div className="text-base font-medium text-white">
-                  Nama User Anda
+                  {user ? user.name : "Nama User Anda"}
                 </div>
                 <div className="text-sm font-medium text-blue-200">
-                  email@anda.com
+                  {user ? user.email : "email@anda.com"}
                 </div>
               </div>
               <button
@@ -235,7 +253,6 @@ function Navbar() {
                 }`}
                 title="Logout"
               >
-                <span className="sr-only">Logout</span>
                 <ArrowRightOnRectangleIcon
                   className="h-6 w-6"
                   aria-hidden="true"
