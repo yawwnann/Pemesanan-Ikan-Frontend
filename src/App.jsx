@@ -5,6 +5,8 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 // import IkanList from "./components/IkanList";
 import DashboardPage from "./pages/Dashboard";
+import KatalogPage from "./pages/Katalog";
+import "@fontsource/inter";
 // import HalamanLain from './pages/HalamanLain'; // Contoh
 
 function App() {
@@ -16,6 +18,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/katalog" element={<KatalogPage />} />
         {/* Rute lainnya */}
       </Routes>
     </Router>
