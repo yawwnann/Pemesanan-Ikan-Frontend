@@ -140,7 +140,7 @@ function Navbar() {
                 <HomeIcon className="h-5 w-5 mr-1" />
                 <span>Home</span>
               </NavLink>
-              <NavLink to="/catalog" className={getNavLinkClass}>
+              <NavLink to="/katalog" className={getNavLinkClass}>
                 <BuildingStorefrontIcon className="h-5 w-5 mr-1" />
                 <span>Katalog</span>
               </NavLink>
