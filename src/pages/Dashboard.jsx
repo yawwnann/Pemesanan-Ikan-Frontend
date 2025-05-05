@@ -294,7 +294,7 @@ function Dashboard() {
             {ikanList.length > 8 && (
               <div className="text-center md:text-right">
                 <button className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 transform hover:scale-105">
-                  Lihat Semua Ikan
+                  <a href="/katalog"> Lihat Semua </a>
                 </button>
               </div>
             )}
