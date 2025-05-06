@@ -5,89 +5,84 @@ import {
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
   ShoppingCartIcon,
-  Squares2X2Icon,
   BuildingStorefrontIcon,
   HomeIcon,
   Bars3Icon,
   XMarkIcon,
+  ArchiveBoxIcon,
 } from "@heroicons/react/24/outline";
 
-import apiClient from "../api/apiClient"; // Pastikan path ini benar
-import siteLogo from "../assets/icon-pasifix.png"; // Pastikan path ini benar
+import apiClient from "../api/apiClient"; // Tetap perlu untuk Logout
+import siteLogo from "../assets/icon-pasifix.png"; // Sesuaikan path
 
 function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // isLoading tidak diperlukan lagi karena kita baca dari localStorage secara sync
+  // const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Efek untuk membaca status login dari localStorage saat komponen mount/refresh
   useEffect(() => {
-    setIsLoading(true);
-    const fetchUserData = async () => {
-      try {
-        const response = await apiClient.get("/user");
-        // Pastikan response.data memiliki struktur yang benar
-        // Jika API Anda mengembalikan user langsung di data: response.data
-        // Jika API Anda mengembalikan { user: {...} }: response.data.user
-        // Sesuaikan baris berikut jika perlu:
-        setUser(response.data.user || response.data);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setUser(null);
-        if (
-          error.response &&
-          (error.response.status === 401 || error.response.status === 403)
-        ) {
-          localStorage.removeItem("authToken");
-          // Hapus juga user jika token tidak valid
-          localStorage.removeItem("authUser");
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     const token = localStorage.getItem("authToken");
     if (token) {
-      fetchUserData();
+      // Jika token ada, anggap user login. Coba ambil data dari localStorage
+      const storedUser = localStorage.getItem("authUser");
+      try {
+        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+        // Set state dengan data dari localStorage atau default jika tidak ada/invalid
+        setUser({
+          // Sediakan nilai default jika properti tidak ada di parsedUser
+          name: parsedUser?.name || "Pengguna",
+          email: parsedUser?.email || "",
+          profile_photo_url: parsedUser?.profile_photo_url || null,
+          // Anda bisa tambahkan properti lain dari localStorage jika ada
+        });
+      } catch (e) {
+        console.error("Gagal parse authUser dari localStorage:", e);
+        // Jika gagal parse, set user ke default logged-in state
+        setUser({ name: "Pengguna", email: "", profile_photo_url: null });
+      }
     } else {
+      // Jika tidak ada token, user null (belum login)
       setUser(null);
-      setIsLoading(false);
     }
-  }, []);
+    // Tidak perlu setIsLoading(false)
+  }, []); // Hanya jalan sekali saat mount
 
+  // Fungsi handleLogout (Panggil API Dulu)
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
+      await apiClient.post("/logout"); // Coba logout dari backend dulu
+      console.log("Logout API call successful (token invalidated on backend).");
+    } catch (error) {
+      console.error(
+        "Logout API call failed, proceeding with local logout:",
+        error.response || error
+      );
+      // Tidak perlu alert karena interceptor mungkin sudah handle/redirect
+      // atau karena logout lokal tetap akan dilakukan
+    } finally {
+      // Selalu bersihkan local storage & state, lalu redirect
       localStorage.removeItem("authToken");
       localStorage.removeItem("authUser");
       setUser(null);
-      // Panggil API logout di background (fire and forget)
-      apiClient
-        .post("/logout")
-        .catch((err) =>
-          console.error("Background logout API call failed:", err)
-        );
-      navigate("/login");
-    } catch (error) {
-      console.error("Local logout process failed:", error);
-      // Tetap arahkan ke login meskipun ada error lokal
-      navigate("/login");
-    } finally {
       setIsLoggingOut(false);
       setIsMobileMenuOpen(false);
+      console.log("Local storage cleared, navigating to login.");
+      navigate("/login");
     }
   };
 
-  // ... (fungsi getNavLinkClass dan getMobileNavLinkClass tidak berubah) ...
+  // Styling classes (tetap sama)
   const getNavLinkClass = ({ isActive }) =>
     `px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center ${
       isActive
         ? "bg-blue-700 text-white"
         : "text-blue-100 hover:bg-blue-700 hover:text-white"
     }`;
-
   const getMobileNavLinkClass = ({ isActive }) =>
     `block px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center ${
       isActive
@@ -95,13 +90,19 @@ function Navbar() {
         : "text-blue-100 hover:bg-blue-700 hover:text-white"
     }`;
 
+  // Error handler gambar (tetap sama)
+  const handleNavbarImageError = (e) => {
+    e.target.onerror = null;
+    e.target.style.display = "none";
+    console.warn("Gagal memuat foto profil Navbar:", e.target.src);
+  };
+
   return (
     <nav className="bg-blue-600 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Left side: Mobile Menu Button & Logo */}
+          {/* Left Side */}
           <div className="flex items-center">
-            {/* ... (kode logo dan tombol mobile tidak berubah) ... */}
             <div className="flex items-center md:hidden mr-2">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -110,11 +111,11 @@ function Navbar() {
                 aria-controls="mobile-menu"
                 aria-expanded={isMobileMenuOpen}
               >
-                <span className="sr-only">Buka menu</span>
+                <span className="sr-only">Buka menu</span>{" "}
                 {isMobileMenuOpen ? (
-                  <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+                  <XMarkIcon className="block h-6 w-6" />
                 ) : (
-                  <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
+                  <Bars3Icon className="block h-6 w-6" />
                 )}
               </button>
             </div>
@@ -132,9 +133,8 @@ function Navbar() {
             </div>
           </div>
 
-          {/* Center: Desktop Navigation Links */}
+          {/* Center Links */}
           <div className="hidden md:flex md:justify-center md:flex-1 md:mx-6">
-            {/* ... (kode navigasi tengah tidak berubah) ... */}
             <div className="flex items-baseline space-x-4">
               <NavLink to="/dashboard" className={getNavLinkClass}>
                 <HomeIcon className="h-5 w-5 mr-1" />
@@ -144,54 +144,37 @@ function Navbar() {
                 <BuildingStorefrontIcon className="h-5 w-5 mr-1" />
                 <span>Katalog</span>
               </NavLink>
-              <NavLink to="/categories" className={getNavLinkClass}>
-                <Squares2X2Icon className="h-5 w-5 mr-1" />
-                <span>Kategori</span>
+              <NavLink to="/keranjang" className={getNavLinkClass}>
+                <ShoppingCartIcon className="h-5 w-5 mr-1" />
+                <span>Keranjang</span>
               </NavLink>
               <NavLink to="/orders" className={getNavLinkClass}>
-                <ShoppingCartIcon className="h-5 w-5 mr-1" />
+                <ArchiveBoxIcon className="h-5 w-5 mr-1" />
                 <span>Pesanan</span>
               </NavLink>
             </div>
           </div>
 
-          {/* Right side: Desktop Profile & Logout / Login Button */}
+          {/* Right Side (Cek 'user' langsung, tanpa 'isLoading') */}
           <div className="hidden md:ml-4 md:flex md:items-center md:space-x-4">
-            {isLoading ? (
-              // Skeleton Loader saat isLoading true
-              <>
-                <div className="h-8 w-8 bg-blue-400 rounded-full animate-pulse"></div>{" "}
-                {/* Ukuran disesuaikan */}
-                <div className="h-7 w-7 bg-blue-400 rounded-md animate-pulse"></div>{" "}
-                {/* Skeleton untuk logout */}
-              </>
-            ) : user ? (
-              // Tampilkan Ikon Asli jika TIDAK loading DAN user ADA
+            {user ? ( // Jika ada user di state (dari localStorage)
               <>
                 <NavLink
-                  to="/profile" // Arahkan ke halaman profil
+                  to="/profile"
                   className="flex items-center p-1 rounded-full text-blue-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-600 focus:ring-white"
-                  title={user.name || "Profile"} // Tampilkan nama user jika ada
+                  title={user.name || "Profile"}
                 >
                   <span className="sr-only">Profile</span>
-                  {/* --- PERUBAHAN DI SINI (DESKTOP) --- */}
                   {user.profile_photo_url ? (
                     <img
                       src={user.profile_photo_url}
                       alt={user.name || "User profile"}
-                      className="h-8 w-8 rounded-full object-cover" // Styling untuk gambar profil
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src =
-                          "https://via.placeholder.com/150?text=Err";
-                      }} // Fallback jika URL gambar error
+                      className="h-8 w-8 rounded-full object-cover"
+                      onError={handleNavbarImageError}
                     />
                   ) : (
-                    <UserCircleIcon className="h-8 w-8" aria-hidden="true" /> // Fallback ke ikon
+                    <UserCircleIcon className="h-8 w-8" aria-hidden="true" />
                   )}
-                  {/* Tampilkan nama di samping ikon (opsional) */}
-                  {/* <span className="ml-2 text-white text-sm font-medium hidden lg:block">{user.name}</span> */}
-                  {/* --- AKHIR PERUBAHAN (DESKTOP) --- */}
                 </NavLink>
                 <button
                   onClick={handleLogout}
@@ -203,7 +186,6 @@ function Navbar() {
                   title="Logout"
                 >
                   <span className="sr-only">Logout</span>
-                  {/* Icon logout tidak perlu loading state kompleks jika proses cepat */}
                   <ArrowRightOnRectangleIcon
                     className="h-7 w-7"
                     aria-hidden="true"
@@ -211,7 +193,7 @@ function Navbar() {
                 </button>
               </>
             ) : (
-              // Tampilkan Login jika TIDAK loading DAN user TIDAK ADA
+              // Jika user null (tidak ada token)
               <NavLink to="/login" className={getNavLinkClass}>
                 <ArrowRightOnRectangleIcon className="h-5 w-5 mr-1" />
                 <span>Login</span>
@@ -221,7 +203,7 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile Menu */}
       <Transition
         show={isMobileMenuOpen}
         as={Fragment}
@@ -236,9 +218,7 @@ function Navbar() {
           className="md:hidden absolute w-full bg-blue-600 shadow-md z-40"
           id="mobile-menu"
         >
-          {/* Mobile Navigation Links */}
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {/* ... (Navigasi mobile tidak berubah) ... */}
             <NavLink
               key="/"
               to="/"
@@ -249,8 +229,8 @@ function Navbar() {
               <span>Home</span>
             </NavLink>
             <NavLink
-              key="/catalog"
-              to="/catalog"
+              key="/katalog"
+              to="/katalog"
               className={getMobileNavLinkClass}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -258,13 +238,13 @@ function Navbar() {
               <span>Katalog</span>
             </NavLink>
             <NavLink
-              key="/categories"
-              to="/categories"
+              key="/keranjang"
+              to="/keranjang"
               className={getMobileNavLinkClass}
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <Squares2X2Icon className="h-5 w-5 mr-2" />
-              <span>Kategori</span>
+              <ShoppingCartIcon className="h-5 w-5 mr-2" />
+              <span>Keranjang</span>
             </NavLink>
             <NavLink
               key="/orders"
@@ -272,57 +252,39 @@ function Navbar() {
               className={getMobileNavLinkClass}
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <ShoppingCartIcon className="h-5 w-5 mr-2" />
+              <ArchiveBoxIcon className="h-5 w-5 mr-2" />
               <span>Pesanan</span>
             </NavLink>
           </div>
-
-          {/* Mobile User Profile/Login Section */}
+          {/* Mobile User/Login Section (Tanpa isLoading) */}
           <div className="pt-4 pb-3 border-t border-blue-700">
-            {isLoading ? (
-              // Skeleton untuk area profil mobile
-              <div className="flex items-center px-5 animate-pulse">
-                <div className="flex-shrink-0 h-10 w-10 bg-blue-400 rounded-full"></div>
-                <div className="ml-3 flex-1 min-w-0 space-y-1">
-                  <div className="h-4 bg-blue-400 rounded w-3/4"></div>
-                  <div className="h-3 bg-blue-400 rounded w-1/2"></div>
-                </div>
-                <div className="ml-auto flex-shrink-0 h-6 w-6 bg-blue-400 rounded-full"></div>
-              </div>
-            ) : user ? (
-              // Tampilkan info user & logout jika TIDAK loading DAN user ADA
+            {user ? (
               <div className="flex items-center px-5">
                 <NavLink
-                  to="/profile" // Arahkan ke halaman profil
+                  to="/profile"
                   className="flex-shrink-0"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  {/* --- PERUBAHAN DI SINI (MOBILE) --- */}
                   {user.profile_photo_url ? (
                     <img
                       src={user.profile_photo_url}
                       alt={user.name || "User profile"}
-                      className="h-10 w-10 rounded-full object-cover" // Ukuran sesuai ikon mobile asli
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src =
-                          "https://via.placeholder.com/150?text=Err";
-                      }}
+                      className="h-10 w-10 rounded-full object-cover"
+                      onError={handleNavbarImageError}
                     />
                   ) : (
                     <UserCircleIcon
                       className="h-10 w-10 rounded-full text-blue-200"
                       aria-hidden="true"
-                    /> // Fallback
+                    />
                   )}
-                  {/* --- AKHIR PERUBAHAN (MOBILE) --- */}
                 </NavLink>
                 <div className="ml-3 flex-1 min-w-0">
                   <div className="text-base font-medium text-white truncate">
-                    {user.name}
+                    {user.name || "User"}
                   </div>
                   <div className="text-sm font-medium text-blue-200 truncate">
-                    {user.email}
+                    {user.email || ""}
                   </div>
                 </div>
                 <button
@@ -334,7 +296,6 @@ function Navbar() {
                   }`}
                   title="Logout"
                 >
-                  <span className="sr-only">Logout</span>
                   <ArrowRightOnRectangleIcon
                     className="h-6 w-6"
                     aria-hidden="true"
@@ -342,7 +303,6 @@ function Navbar() {
                 </button>
               </div>
             ) : (
-              // Tampilkan link login jika TIDAK loading DAN user TIDAK ADA
               <div className="px-2 sm:px-3">
                 <NavLink
                   to="/login"

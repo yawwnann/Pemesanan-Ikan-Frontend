@@ -9,6 +9,7 @@ import "@fontsource/inter";
 import ProfilePage from "./pages/ProfilePage";
 import KatalogPage from "./pages/KatalogPage";
 import DetailIkanPage from "./pages/DetailIkanPage";
+import KeranjangPage from "./pages/KeranjangPage";
 // import HalamanLain from './pages/HalamanLain'; // Contoh
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/katalog" element={<KatalogPage />} />
         <Route path="/ikan/:slug" element={<DetailIkanPage />} />
+        <Route path="/keranjang" element={<KeranjangPage />} />
         {/* Rute lainnya */}
       </Routes>
     </Router>
