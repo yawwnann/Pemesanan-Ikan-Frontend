@@ -367,7 +367,7 @@ function KeranjangPage() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-8">
