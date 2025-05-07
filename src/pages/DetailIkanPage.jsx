@@ -1,8 +1,6 @@
 import React, { useState, useEffect, Fragment } from "react"; // Impor Fragment
 import { useParams, useNavigate } from "react-router-dom";
 import apiClient from "../api/apiClient";
-import Navbar from "../components/Navbar";
-import Footer from "../ui/Footer"; // Sesuaikan path jika perlu
 import {
   ShoppingCartIcon,
   CheckCircleIcon, // Ikon Sukses
@@ -294,7 +292,7 @@ function DetailIkanPage() {
     return (
       <>
         {" "}
-        <Navbar /> <DetailLoadingSkeleton /> <Footer />{" "}
+        <DetailLoadingSkeleton />{" "}
       </>
     );
   }
@@ -302,7 +300,6 @@ function DetailIkanPage() {
   if (error) {
     return (
       <div className="bg-white min-h-screen flex flex-col">
-        <Navbar />
         <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 flex flex-col items-center justify-center text-center">
           <XCircleIcon className="w-16 h-16 text-red-400 mb-4" />
           <h2 className="text-xl font-semibold text-gray-700 mb-2">
@@ -316,7 +313,6 @@ function DetailIkanPage() {
             <ChevronLeftIcon className="h-4 w-4 mr-1" /> Kembali
           </button>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -325,11 +321,9 @@ function DetailIkanPage() {
     return (
       // Fallback jika ikanDetail null setelah loading selesai (seharusnya jarang terjadi)
       <div className="bg-white min-h-screen flex flex-col">
-        <Navbar />
         <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 text-center">
           <p className="text-gray-500">Detail ikan tidak dapat dimuat.</p>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -371,7 +365,6 @@ function DetailIkanPage() {
       {" "}
       {/* Fragment agar modal bisa diletakkan di level yang sama */}
       <div className="bg-white min-h-screen flex flex-col">
-        <Navbar />
         <main className="flex-grow">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
             {/* Tombol Kembali */}
@@ -507,7 +500,6 @@ function DetailIkanPage() {
             )}
           </div>
         </main>
-        <Footer />
       </div>
       {/* --- Render Modal Notifikasi --- */}
       <Transition appear show={isModalOpen} as={Fragment}>

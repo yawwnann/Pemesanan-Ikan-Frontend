@@ -10,9 +10,7 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import apiClient from "../api/apiClient";
-import Navbar from "../components/Navbar";
-// Hapus import Navbar jika Navbar dirender di level App.js
-// import Navbar from '../components/Navbar';
+
 import { useNavigate, Link } from "react-router-dom";
 
 // (Salin kode LoadingSpinner dari jawaban sebelumnya)
@@ -316,7 +314,6 @@ function ProfilePage() {
       // Wrapper div untuk memastikan Navbar tidak ikut terganti saat state update di page ini
       // Jika Navbar ada di App.js, div ini tidak perlu
       <div>
-        <Navbar />
         <div className="bg-gray-100 min-h-[calc(100vh-4rem)] py-8">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* --- Bagian Atas (Biru - Sama) --- */}

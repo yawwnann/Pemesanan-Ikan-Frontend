@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger"; // 1. Impor ScrollTrigger
-import Navbar from "../components/Navbar";
+
 import laptopImage from "../assets/dashboard/LaptopDashboard.png";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../api/apiClient";
-import Footer from "../ui/Footer";
 import {
   CheckCircleIcon,
   ShoppingCartIcon,
@@ -212,8 +211,6 @@ function Dashboard() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Navbar />
-
       <section className="relative w-full bg-blue-600 text-white overflow-hidden">
         {/* ... Hero Section JSX ... */}
         <div className="container mx-auto px-6 py-24 md:py-32 lg:py-40 relative z-10">
@@ -409,8 +406,6 @@ function Dashboard() {
       <section className="testimonials-section mt-12 bg-gray-50 py-4">
         <InfiniteMovingCardsDemo />
       </section>
-
-      <Footer />
     </div>
   );
 }

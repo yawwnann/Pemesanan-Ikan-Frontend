@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import apiClient from "../api/apiClient";
 import { useNavigate, Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Footer from "../ui/Footer";
 import {
   ShoppingCartIcon,
   TrashIcon,
@@ -12,6 +10,7 @@ import {
   CreditCardIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
+
 import {
   CheckCircleIcon as SolidCheckCircle,
   XCircleIcon as SolidXCircle,
@@ -363,12 +362,12 @@ function KeranjangPage() {
     }
   };
   const handleCheckout = () => {
-    alert("Navigasi ke halaman Checkout (belum implementasi)");
+    navigate("/checkout");
+    // alert("Navigasi ke halaman Checkout (belum implementasi)");
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-8">
           Keranjang Belanja Anda
@@ -538,7 +537,6 @@ function KeranjangPage() {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 }
