@@ -1,20 +1,16 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
-import apiClient from "../api/apiClient"; // Sesuaikan path
+import apiClient from "../api/apiClient";
 import { useNavigate, Link } from "react-router-dom";
 import {
   MagnifyingGlassIcon,
   ShoppingCartIcon,
-  ArrowPathIcon, // Ikon untuk loading add to cart
-} from "@heroicons/react/24/solid"; // Menggunakan solid untuk konsistensi ikon aksi
-import {
-  ArrowsUpDownIcon,
-  FunnelIcon,
-  CheckBadgeIcon, // Mungkin tidak terpakai, tapi biarkan jika Pagination butuh
-  ClockIcon, // Mungkin tidak terpakai, tapi biarkan jika Pagination butuh
-} from "@heroicons/react/24/outline";
-import { cn } from "../lib/utils"; // Sesuaikan path
+  ArrowPathIcon,
+} from "@heroicons/react/24/solid";
+import { ArrowsUpDownIcon, FunnelIcon } from "@heroicons/react/24/outline";
+import { cn } from "../lib/utils";
 
-// Helper Function: Format Rupiah
 const formatRupiah = (angka) => {
   if (angka === null || angka === undefined) return "Rp -";
   return new Intl.NumberFormat("id-ID", {
@@ -25,7 +21,6 @@ const formatRupiah = (angka) => {
   }).format(angka);
 };
 
-// Custom Hook: useDebounce
 function useDebounce(value, delay) {
   const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
@@ -37,7 +32,6 @@ function useDebounce(value, delay) {
   return debouncedValue;
 }
 
-// Komponen: Ikan Card (Dengan Fungsi Add to Cart Terimplementasi)
 function IkanCard({ ikan }) {
   const navigate = useNavigate();
   const [isAdding, setIsAdding] = useState(false);
@@ -51,7 +45,8 @@ function IkanCard({ ikan }) {
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
-    if (isAdding) return;
+    if (isAdding || ikan.status_ketersediaan?.toLowerCase() !== "tersedia")
+      return;
     setIsAdding(true);
     setFeedback({ type: "", message: "" });
 
@@ -59,9 +54,7 @@ function IkanCard({ ikan }) {
       await apiClient.post("/keranjang", { ikan_id: ikan.id, quantity: 1 });
       setFeedback({ type: "success", message: `${ikan.nama} ditambahkan!` });
       setTimeout(() => setFeedback({ type: "", message: "" }), 2500);
-      // Opsional: Update global state/trigger notifikasi lain
     } catch (err) {
-      console.error("Gagal menambah ke keranjang:", err);
       let errorMessage = "Gagal menambah ke keranjang.";
       if (
         err.response &&
@@ -91,6 +84,7 @@ function IkanCard({ ikan }) {
           {feedback.message}
         </div>
       )}
+
       <div
         className="relative overflow-hidden cursor-pointer"
         onClick={() => viewDetail(ikan.slug)}
@@ -115,52 +109,67 @@ function IkanCard({ ikan }) {
             </span>
           )}
         </div>
-        <button
-          onClick={handleAddToCart}
-          disabled={
-            ikan.status_ketersediaan?.toLowerCase() !== "tersedia" || isAdding
-          }
-          className="absolute bottom-2 right-2 z-10 p-2 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 transition-all duration-300 opacity-0 group-hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
-          title="Tambah ke Keranjang"
-        >
-          {isAdding ? (
-            <ArrowPathIcon className="w-5 h-5 animate-spin" />
-          ) : (
-            <ShoppingCartIcon className="w-5 h-5" />
-          )}
-        </button>
       </div>
-      <div
-        className="p-4 flex flex-col flex-grow cursor-pointer"
-        onClick={() => viewDetail(ikan.slug)}
-      >
-        <h3 className="text-base font-semibold text-gray-800 mb-1 line-clamp-2">
-          {ikan.nama}
-        </h3>
-        <p className="text-lg font-bold text-blue-700 mt-auto pt-2">
-          {formatRupiah(ikan.harga)}
-        </p>
+
+      <div className="p-4 flex flex-col flex-grow">
+        <div
+          onClick={() => viewDetail(ikan.slug)}
+          className="cursor-pointer mb-1"
+        >
+          <h3 className="text-base font-semibold text-gray-800 line-clamp-2">
+            {ikan.nama}
+          </h3>
+        </div>
+
+        <div className="mt-auto pt-2 flex items-center justify-between">
+          <p
+            className="text-lg font-bold text-blue-700 cursor-pointer"
+            onClick={() => viewDetail(ikan.slug)}
+          >
+            {formatRupiah(ikan.harga)}
+          </p>
+          <button
+            onClick={handleAddToCart}
+            disabled={
+              ikan.status_ketersediaan?.toLowerCase() !== "tersedia" || isAdding
+            }
+            className={cn(
+              "p-1.5 sm:p-2 rounded-md shadow-sm transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 flex-shrink-0",
+              ikan.status_ketersediaan?.toLowerCase() !== "tersedia" || isAdding
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            )}
+            title="Tambah ke Keranjang"
+          >
+            {isAdding ? (
+              <ArrowPathIcon className="w-5 h-5 animate-spin" />
+            ) : (
+              <ShoppingCartIcon className="w-5 h-5" />
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-// Komponen: Pagination
 function Pagination({ meta, onPageChange }) {
   if (!meta || meta.last_page <= 1) return null;
+
   const getPageNumber = (url) => {
-    if (!url) return;
-
+    if (!url) return null;
     try {
-      const p = new URL(url);
-
-      return p.searchParams.get("page");
+      const parsedUrl = new URL(url);
+      return parsedUrl.searchParams.get("page");
     } catch {
-      console.error("Invalid URL for pagination:", url);
-
+      const match = url.match(/[?&]page=(\d+)/);
+      if (match && match[1]) {
+        return match[1];
+      }
       return null;
     }
   };
+
   return (
     <nav className="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0 mt-10 py-5">
       <div className="hidden sm:block">
@@ -173,80 +182,85 @@ function Pagination({ meta, onPageChange }) {
       <div className="flex flex-1 justify-between sm:justify-end space-x-1">
         {meta.links?.map((link, index) => {
           const pageNumber = getPageNumber(link.url);
-          const isDisabled = !link.url;
+          // const isDisabled = !link.url || link.active;
           const isCurrent = link.active;
-          if (link.label.includes("Previous")) {
+
+          if (
+            link.label.includes("Previous") ||
+            link.label.includes("&laquo;")
+          ) {
             return (
               <button
                 key={`prev-${index}`}
                 onClick={() =>
-                  !isDisabled && pageNumber && onPageChange(pageNumber)
+                  link.url && pageNumber && onPageChange(pageNumber)
                 }
-                disabled={isDisabled}
+                disabled={!link.url}
                 className={cn(
                   "relative inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0",
-                  isDisabled
+                  !link.url
                     ? "text-gray-300 cursor-not-allowed"
                     : "text-gray-900 hover:bg-gray-50 focus:bg-gray-100"
                 )}
               >
-                Sebelumnya
+                {link.label.includes("&laquo;") ? (
+                  <span dangerouslySetInnerHTML={{ __html: link.label }} />
+                ) : (
+                  "Sebelumnya"
+                )}
               </button>
             );
-          } else if (link.label.includes("Next")) {
+          } else if (
+            link.label.includes("Next") ||
+            link.label.includes("&raquo;")
+          ) {
             return (
               <button
                 key={`next-${index}`}
                 onClick={() =>
-                  !isDisabled && pageNumber && onPageChange(pageNumber)
+                  link.url && pageNumber && onPageChange(pageNumber)
                 }
-                disabled={isDisabled}
+                disabled={!link.url}
                 className={cn(
                   "relative inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0",
-                  isDisabled
+                  !link.url
                     ? "text-gray-300 cursor-not-allowed"
                     : "text-gray-900 hover:bg-gray-50 focus:bg-gray-100"
                 )}
               >
-                Berikutnya
+                {link.label.includes("&raquo;") ? (
+                  <span dangerouslySetInnerHTML={{ __html: link.label }} />
+                ) : (
+                  "Berikutnya"
+                )}
               </button>
             );
+          } else if (link.label === "...") {
+            return (
+              <span
+                key={`ellipsis-${index}`}
+                className="relative hidden items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0 md:inline-flex cursor-default"
+              >
+                ...
+              </span>
+            );
           } else if (pageNumber) {
-            const currentPage = meta.current_page;
-            const lastPage = meta.last_page;
-            const pageNum = parseInt(pageNumber, 10);
-            if (
-              pageNum === 1 ||
-              pageNum === lastPage ||
-              Math.abs(pageNum - currentPage) <= 1
-            ) {
-              return (
-                <button
-                  key={`page-${link.label}-${index}`}
-                  onClick={() => !isCurrent && onPageChange(pageNumber)}
-                  disabled={isCurrent}
-                  aria-current={isCurrent ? "page" : undefined}
-                  className={cn(
-                    "relative hidden items-center px-4 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0 md:inline-flex",
-                    isCurrent
-                      ? "z-10 bg-blue-600 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 cursor-default"
-                      : "text-gray-900 hover:bg-gray-50 focus:bg-gray-100"
-                  )}
-                >
-                  {link.label.replace(/&laquo;|&raquo;/g, "").trim()}
-                </button>
-              );
-            } else if (Math.abs(pageNum - currentPage) === 2) {
-              return (
-                <span
-                  key={`ellipsis-${pageNum}-${index}`}
-                  className="relative hidden items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0 md:inline-flex"
-                >
-                  ...
-                </span>
-              );
-            }
-            return null;
+            return (
+              <button
+                key={`page-${link.label}-${index}`}
+                onClick={() => !isCurrent && onPageChange(pageNumber)}
+                disabled={isCurrent}
+                aria-current={isCurrent ? "page" : undefined}
+                className={cn(
+                  "relative hidden items-center px-4 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0 md:inline-flex",
+                  isCurrent
+                    ? "z-10 bg-blue-600 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 cursor-default"
+                    : "text-gray-900 hover:bg-gray-50 focus:bg-gray-100"
+                )}
+              >
+                {link.label}
+              </button>
+            );
           }
           return null;
         })}
@@ -255,7 +269,6 @@ function Pagination({ meta, onPageChange }) {
   );
 }
 
-// Komponen Utama Halaman Katalog
 function KatalogPage() {
   const [ikanList, setIkanList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -295,19 +308,19 @@ function KatalogPage() {
       }
     }
     if (availability) params.status_ketersediaan = availability;
-    console.log("Fetching /ikan with params:", params);
     try {
       const response = await apiClient.get("/ikan", { params });
-      if (response.data && response.data.data) {
+      if (response.data && response.data.data && response.data.meta) {
         setIkanList(response.data.data);
         setPaginationData(response.data);
       } else {
         setIkanList([]);
         setPaginationData(null);
-        console.error("Format data ikan tidak sesuai:", response.data);
+        setError("Format data dari server tidak sesuai.");
       }
-    } catch (err) {
-      console.error("Gagal memuat katalog:", err);
+    } catch (err_param) {
+      // PERBAIKAN: 'err' diganti menjadi 'err_param' atau '_err' karena 'err' dipakai di atas
+      console.error("Gagal memuat katalog:", err_param); // Gunakan err_param
       setError("Gagal memuat data ikan. Silakan coba lagi nanti.");
       setIkanList([]);
       setPaginationData(null);
@@ -329,51 +342,51 @@ function KatalogPage() {
     if (currentPage !== 1) {
       setCurrentPage(1);
     }
-  }, [debouncedSearch, selectedSort, selectedAvailability]);
+  }, [debouncedSearch, selectedSort, selectedAvailability, currentPage]);
 
   const handlePageChange = (page) => {
     const pageNum = parseInt(page, 10);
     if (
       !isNaN(pageNum) &&
       pageNum >= 1 &&
-      pageNum <= paginationData?.meta?.last_page
+      pageNum <= (paginationData?.meta?.last_page || 1) &&
+      pageNum !== currentPage
     ) {
       setCurrentPage(pageNum);
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } else {
-      console.warn("Invalid page number requested:", page);
     }
   };
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
         <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 md:mb-8 gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              Katalog Ikan
+              Katalog Seafood
             </h1>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full md:w-auto">
-            <div className="relative flex-grow md:flex-none md:w-64">
+            <div className="relative flex-grow sm:flex-grow-0 sm:w-48 md:w-56">
               <input
                 type="text"
-                placeholder="Cari..."
+                placeholder="Cari nama ikan..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
-              <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             </div>
-            <div className="relative flex-grow md:flex-none">
+            <div className="relative flex-grow sm:flex-grow-0 sm:w-40 md:w-48">
               <select
                 value={selectedSort}
                 onChange={(e) => setSelectedSort(e.target.value)}
-                className="appearance-none w-full pl-3 pr-8 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                className="appearance-none w-full pl-3 pr-8 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white cursor-pointer"
+                aria-label="Urutkan berdasarkan"
               >
                 <option value="terbaru">Terbaru</option>
-                <option value="harga_asc">Harga ↑</option>
-                <option value="harga_desc">Harga ↓</option>
+                <option value="harga_asc">Harga Terendah</option>
+                <option value="harga_desc">Harga Tertinggi</option>
               </select>
               <svg
                 className="absolute right-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none"
@@ -390,13 +403,14 @@ function KatalogPage() {
                 />
               </svg>
             </div>
-            <div className="relative flex-grow md:flex-none">
+            <div className="relative flex-grow sm:flex-grow-0 sm:w-40 md:w-48">
               <select
                 value={selectedAvailability}
                 onChange={(e) => setSelectedAvailability(e.target.value)}
-                className="appearance-none w-full pl-3 pr-8 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                className="appearance-none w-full pl-3 pr-8 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white cursor-pointer"
+                aria-label="Filter berdasarkan ketersediaan"
               >
-                <option value="">Semua</option>
+                <option value="">Semua Status</option>
                 <option value="tersedia">Tersedia</option>
                 <option value="habis">Habis</option>
               </select>
@@ -438,12 +452,14 @@ function KatalogPage() {
               )}
         </div>
 
-        {!loading && paginationData?.meta && paginationData.meta.total > 0 && (
-          <Pagination
-            meta={paginationData.meta}
-            onPageChange={handlePageChange}
-          />
-        )}
+        {!loading &&
+          paginationData?.meta &&
+          paginationData.meta.total > (paginationData.meta.per_page || 0) && (
+            <Pagination
+              meta={paginationData.meta}
+              onPageChange={handlePageChange}
+            />
+          )}
       </div>
     </div>
   );

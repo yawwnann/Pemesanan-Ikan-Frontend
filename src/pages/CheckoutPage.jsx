@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../api/apiClient"; // Sesuaikan path ke apiClient Anda
-import Navbar from "../components/Navbar"; // Sesuaikan path ke Navbar
 import {
   ShoppingCartIcon,
   UserCircleIcon,
@@ -309,7 +308,6 @@ function CheckoutPage() {
   // --- Render JSX ---
   return (
     <>
-      <Navbar />
       {/* Background halaman lebih terang */}
       <div className="bg-slate-50 min-h-screen py-8 sm:py-12">
         {/* Padding kontainer responsif */}
