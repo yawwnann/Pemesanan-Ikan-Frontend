@@ -148,7 +148,7 @@ function Navbar() {
                 <ShoppingCartIcon className="h-5 w-5 mr-1" />
                 <span>Keranjang</span>
               </NavLink>
-              <NavLink to="/orders" className={getNavLinkClass}>
+              <NavLink to="/pesanan" className={getNavLinkClass}>
                 <ArchiveBoxIcon className="h-5 w-5 mr-1" />
                 <span>Pesanan</span>
               </NavLink>
@@ -247,8 +247,8 @@ function Navbar() {
               <span>Keranjang</span>
             </NavLink>
             <NavLink
-              key="/orders"
-              to="/orders"
+              key="/pesanan"
+              to="/pesanan"
               className={getMobileNavLinkClass}
               onClick={() => setIsMobileMenuOpen(false)}
             >

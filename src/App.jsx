@@ -15,7 +15,10 @@ import ProfilePage from "./pages/ProfilePage";
 import KatalogPage from "./pages/KatalogPage";
 import DetailIkanPage from "./pages/DetailIkanPage";
 import KeranjangPage from "./pages/KeranjangPage";
+import PesananSuksesPage from "./pages/PesananSuksesPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import PesananPage from "./pages/PesananPage";
+import PesananDetailPage from "./pages/PesananDetailPage";
 
 import "@fontsource/inter";
 
@@ -38,7 +41,8 @@ function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-
+        <Route path="/pesanan/sukses" element={<PesananSuksesPage />} />
+        {/* Protected Routes */}
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
@@ -46,6 +50,11 @@ function App() {
           <Route path="/ikan/:slug" element={<DetailIkanPage />} />
           <Route path="/keranjang" element={<KeranjangPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/pesanan" element={<PesananPage />} />
+          <Route
+            path="/pesanan/detail/:orderId"
+            element={<PesananDetailPage />}
+          />
         </Route>
       </Routes>
     </Router>
