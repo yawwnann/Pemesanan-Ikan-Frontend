@@ -28,8 +28,7 @@ const formatRupiah = (angka) => {
 const FormInputSkeleton = () => (
   <div className="mb-5 animate-pulse">
     <div className="h-4 bg-slate-200 rounded w-1/3 mb-2"></div>
-    <div className="h-11 bg-slate-200 rounded-lg w-full"></div>{" "}
-    {/* Sedikit lebih tinggi */}
+    <div className="h-11 bg-slate-200 rounded-lg w-full"></div>
   </div>
 );
 
@@ -143,18 +142,9 @@ function CheckoutPage() {
       script.setAttribute("data-client-key", clientKey);
       script.async = true;
       document.body.appendChild(script);
-      //   console.log("[CheckoutPage] Loading Midtrans Snap Script. URL:", snapUrl);
-      //   console.log(
-      //     "[CheckoutPage] Midtrans Client Key:",
-      //     clientKey ? "Loaded" : "Using fallback/placeholder"
-      //   );
     }
     return () => {
-      // Opsional: Hapus script jika komponen di-unmount untuk kebersihan,
-      // tapi biasanya tidak masalah jika tetap ada.
-      // if (script && script.parentNode) {
-      //   script.parentNode.removeChild(script);
-      // }
+      // Optional cleanup
     };
   }, []);
 
@@ -178,8 +168,6 @@ function CheckoutPage() {
               ...prev,
               namaPemesan: userData.name || "",
               nomorHp: userData.phone || userData.nomor_whatsapp || "",
-              // Jika alamat default ada di user data, bisa di-set di sini juga
-              // alamatPengiriman: userData.default_address || "",
             }));
           }
         } catch (userErr) {
@@ -217,7 +205,7 @@ function CheckoutPage() {
                   replace: true,
                   state: { from: "/checkout" },
                 }),
-              3500 // Waktu redirect sedikit lebih lama
+              3500
             );
           } else {
             setCartError(
@@ -285,55 +273,50 @@ function CheckoutPage() {
         alamat_pengiriman: formData.alamatPengiriman,
         catatan: formData.catatan,
         user_email: currentUser?.email,
-        user_id: currentUser?.id, // Tambahkan user_id jika backend memerlukannya
+        user_id: currentUser?.id,
       };
 
-      // Hapus field jika null/undefined untuk menghindari masalah di backend
       Object.keys(orderPayload).forEach((key) => {
         if (orderPayload[key] === null || orderPayload[key] === undefined) {
           delete orderPayload[key];
         }
       });
 
-      //   console.log(
-      //     "[CheckoutPage] Mengirim data pesanan ke backend:",
-      //     orderPayload
-      //   );
       const response = await apiClient.post("/pesanan", orderPayload);
-      const { snap_token } = response.data;
+      // Variabel order_id dihapus dari destructuring jika tidak digunakan
+      const { snap_token /*, order_id */ } = response.data;
+      // Jika Anda memerlukan order_id dari backend untuk logging atau tujuan lain sebelum Midtrans,
+      // Anda bisa menyimpannya di variabel terpisah atau menggunakannya langsung:
+      // const backendOrderId = response.data.order_id;
+      // console.log("Backend Order ID:", backendOrderId);
 
       if (!snap_token) {
-        // console.error(
-        //   "[CheckoutPage] Respons backend tidak menyertakan snap_token:",
-        //   response.data
-        // );
         throw new Error(
           "Gagal mendapatkan token pembayaran dari server. Mohon coba lagi."
         );
       }
-      //   console.log(
-      //     "[CheckoutPage] Menerima Snap Token:",
-      //     snap_token,
-      //     "untuk Order ID:",
-      //     order_id
-      //   );
+
+      // Logging order_id dari backend jika masih diperlukan (misalnya untuk debugging)
+      // console.log(
+      //   "[CheckoutPage] Menerima Snap Token:",
+      //   snap_token,
+      //   "untuk Order ID Internal:",
+      //   response.data.order_id // Mengakses langsung jika diperlukan
+      // );
 
       if (window.snap) {
         window.snap.pay(snap_token, {
           onSuccess: function (result) {
-            // console.log("[CheckoutPage] Midtrans Payment Success:", result);
             navigate(
               `/pesanan/sukses?order_id=${result.order_id}&status_code=${result.status_code}&transaction_status=${result.transaction_status}`
             );
           },
           onPending: function (result) {
-            // console.log("[CheckoutPage] Midtrans Payment Pending:", result);
             navigate(
               `/pesanan/pending?order_id=${result.order_id}&status_code=${result.status_code}&transaction_status=${result.transaction_status}&payment_type=${result.payment_type}`
             );
           },
           onError: function (result) {
-            // console.error("[CheckoutPage] Midtrans Payment Error:", result);
             setPaymentError(
               `Pembayaran Gagal: ${
                 result.status_message ||
@@ -342,26 +325,18 @@ function CheckoutPage() {
             );
           },
           onClose: function () {
-            // console.log("[CheckoutPage] Midtrans payment popup closed by user");
             setPaymentError(
-              // Pesan lebih informatif
               "Jendela pembayaran ditutup. Pesanan Anda menunggu penyelesaian pembayaran. Anda dapat mencoba lagi dari halaman detail pesanan."
             );
           },
         });
       } else {
-        // console.error("[CheckoutPage] Midtrans Snap.js belum terload.");
         throw new Error(
           "Layanan pembayaran saat ini tidak tersedia. Mohon coba beberapa saat lagi atau hubungi dukungan."
         );
       }
     } catch (error) {
-      //   console.error(
-      //     "[CheckoutPage] Gagal memproses checkout:",
-      //     error.response?.data || error.message || error
-      //   );
       setPaymentError(
-        // Pesan error lebih user-friendly
         `Gagal Memproses Checkout: ${
           error.response?.data?.message ||
           error.message ||
@@ -373,20 +348,14 @@ function CheckoutPage() {
     }
   };
 
-  // Handler untuk tombol kembali
   const handleGoBack = () => {
-    // Anda bisa mengarahkan ke halaman spesifik seperti '/keranjang' atau '/katalog',
-    // atau menggunakan navigate(-1) untuk kembali ke halaman sebelumnya.
-    // Untuk "kembali ke halaman pesanan", asumsikan rutenya adalah '/pesanan-saya' atau '/daftar-pesanan'
-    // Ganti '/pesanan-saya' dengan rute yang sesuai
-    navigate("/keranjang"); // Contoh: kembali ke keranjang, atau bisa juga ke /pesanan-saya
+    navigate("/keranjang");
   };
 
   return (
     <>
-      <div className="bg-slate-50 min-h-screen py-8 sm:py-12">
+      <div className="bg-slate-50 min-h-screen py-8 sm:py-12 font-sans">
         {" "}
-        {/* Background lebih cerah: slate-50 */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {loadingCart ? (
             <CheckoutPageSkeleton />
@@ -414,7 +383,7 @@ function CheckoutPage() {
                   </button>
                 ) : cartError.includes("Keranjang belanja Anda kosong") ? (
                   <button
-                    onClick={() => navigate("/katalog")} // Asumsi halaman katalog
+                    onClick={() => navigate("/katalog")}
                     className="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out font-medium"
                   >
                     Mulai Belanja
@@ -427,7 +396,7 @@ function CheckoutPage() {
                     Coba Lagi
                   </button>
                 )}
-                <button // Tombol kembali umum jika ada error
+                <button
                   onClick={handleGoBack}
                   className="w-full sm:w-auto px-6 py-3 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 transition duration-150 ease-in-out font-medium"
                 >
@@ -437,25 +406,19 @@ function CheckoutPage() {
             </div>
           ) : (
             <>
-              {/* --- Header dengan Tombol Kembali dan Judul --- */}
               <div className="flex justify-between items-center mb-8 sm:mb-10">
                 <button
-                  onClick={handleGoBack} // Menggunakan handler baru
+                  onClick={handleGoBack}
                   className="flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors duration-150 group py-2 px-3 -ml-3 rounded-md hover:bg-indigo-50"
                 >
                   <ArrowLeftIcon className="h-5 w-5 mr-1.5 transform transition-transform duration-150 group-hover:-translate-x-0.5" />
-                  Kembali ke Keranjang {/* Ganti sesuai tujuan */}
+                  Kembali ke Keranjang
                 </button>
-                {/* Judul hanya untuk desktop, agar layout seimbang */}
                 <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-800 text-center flex-grow invisible sm:visible">
                   Checkout
                 </h1>
-                <div className="w-auto sm:w-40">
-                  {" "}
-                  {/* Placeholder untuk menyeimbangkan tombol kembali */}{" "}
-                </div>
+                <div className="w-auto sm:w-40"> </div>
               </div>
-              {/* Judul untuk mobile, terlihat jelas */}
               <h1 className="text-2xl font-bold tracking-tight text-slate-800 mb-6 text-center sm:hidden">
                 Checkout
               </h1>
@@ -463,7 +426,6 @@ function CheckoutPage() {
               {paymentError && (
                 <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-md shadow-md text-sm flex items-start">
                   {" "}
-                  {/* Border kiri untuk penekanan */}
                   <XCircleIcon className="h-5 w-5 mr-3 text-red-500 flex-shrink-0 mt-0.5" />
                   <span className="leading-relaxed">{paymentError}</span>
                 </div>
@@ -472,10 +434,8 @@ function CheckoutPage() {
                 onSubmit={handleProceedToPayment}
                 className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12"
               >
-                {/* Kolom Form Detail Pengiriman */}
                 <div className="lg:col-span-2 bg-white p-6 sm:p-8 rounded-xl shadow-xl">
                   {" "}
-                  {/* Card style baru */}
                   <h2 className="text-xl sm:text-2xl font-semibold text-slate-800 mb-7 border-b border-slate-200 pb-5">
                     Detail Alamat & Kontak Penerima
                   </h2>
@@ -565,16 +525,13 @@ function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Kolom Ringkasan Pesanan */}
                 <div className="lg:col-span-1 bg-white p-6 sm:p-8 rounded-xl shadow-xl h-fit">
                   {" "}
-                  {/* Card style baru */}
                   <h2 className="text-xl sm:text-2xl font-semibold text-slate-800 mb-7 border-b border-slate-200 pb-5">
                     Ringkasan Pesanan
                   </h2>
                   <div className="max-h-80 overflow-y-auto mb-6 pr-2 -mr-2 space-y-4 custom-scrollbar">
                     {" "}
-                    {/* Tambah custom-scrollbar jika ada CSS nya */}
                     {cartItems.map((item) => (
                       <div
                         key={item.id}
@@ -586,12 +543,12 @@ function CheckoutPage() {
                               item.ikan?.gambar_utama
                                 ? `https://res.cloudinary.com/dm3icigfr/image/upload/w_80,h_80,c_fill,g_auto,q_auto,f_auto/${item.ikan.gambar_utama}`
                                 : "/placeholder-image.webp"
-                            } // Optimasi gambar & placeholder .webp
+                            }
                             alt={item.ikan?.nama_ikan || "Gambar Ikan"}
                             className="w-16 h-16 object-cover rounded-lg mr-4 flex-shrink-0 shadow-sm bg-slate-100"
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = "/placeholder-image.webp"; // Ganti dengan path placeholder Anda
+                              e.target.src = "/placeholder-image.webp";
                             }}
                           />
                           <div className="flex-grow mt-0.5">
@@ -606,7 +563,6 @@ function CheckoutPage() {
                         </div>
                         <p className="text-sm font-semibold text-slate-700 flex-shrink-0 ml-2 mt-0.5 text-right">
                           {" "}
-                          {/* text-right */}
                           {formatRupiah(calculateItemSubtotal(item))}
                         </p>
                       </div>
@@ -619,14 +575,8 @@ function CheckoutPage() {
                         {formatRupiah(calculateTotal())}
                       </p>
                     </div>
-                    {/* Anda bisa menambahkan biaya pengiriman atau diskon di sini jika ada */}
-                    {/* <div className="flex justify-between items-center text-sm">
-                        <p className="text-slate-600">Biaya Pengiriman</p>
-                        <p className="font-medium text-slate-800">{formatRupiah(0)}</p>
-                    </div> */}
                     <div className="flex justify-between items-center font-bold text-lg pt-2">
                       {" "}
-                      {/* Ukuran font lebih besar */}
                       <p className="text-slate-900">Total Pembayaran</p>
                       <p className="text-indigo-600">
                         {formatRupiah(calculateTotal())}
@@ -640,7 +590,7 @@ function CheckoutPage() {
                       cartItems.length === 0 ||
                       loadingCart
                     }
-                    className="mt-10 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ease-in-out flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-indigo-400" // Style disabled lebih jelas
+                    className="mt-10 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 px-6 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 ease-in-out flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-indigo-400"
                   >
                     {isProcessingCheckout ? (
                       <>
